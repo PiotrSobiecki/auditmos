@@ -1,4 +1,4 @@
-import { CSSProperties, FC, useMemo, useState } from "react";
+import { CSSProperties, FC, useMemo, useState, useCallback } from "react";
 import useRevealOnIntersect from "@/hooks/useRevealOnIntersect";
 import { getRevealStyle } from "@/utils/reveal";
 import auditsVideo from "../../../assets/video/kafelek.mp4";
@@ -25,42 +25,55 @@ const AuditCard: FC<AuditCardProps> = ({
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     setMousePos({
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
     });
-  };
+  }, []);
 
-  // Generujemy siatkę punktów
-  const gridSize = 30; // Co ile pikseli punkt
-  const gridPoints = [];
+  // Generujemy statyczną siatkę punktów tylko raz
+  const gridSize = 30; // Rzadziej = szybciej
+  const cardWidth = 400;
+  const cardHeight = 360;
 
-  if (isHovered) {
-    const cardWidth = 400; // Przybliżona szerokość karty
-    const cardHeight = 360; // Przybliżona wysokość karty
-
+  const staticGrid = useMemo(() => {
+    const points = [];
     for (let y = 0; y <= cardHeight; y += gridSize) {
       for (let x = 0; x <= cardWidth; x += gridSize) {
-        const distance = Math.sqrt(
-          Math.pow(x - mousePos.x, 2) + Math.pow(y - mousePos.y, 2)
-        );
-        const maxDistance = 120; // Promień wpływu
-        const effect = Math.max(0, 1 - distance / maxDistance);
-
-        gridPoints.push({
-          x,
-          y,
-          scale: 1 + effect * 2.5, // Powiększenie
-          color:
-            effect > 0
-              ? `rgba(147, 51, 234, ${effect})`
-              : "rgba(255, 255, 255, 0.15)", // Fioletowy gradient
-        });
+        points.push({ x, y });
       }
     }
-  }
+    return points;
+  }, []);
+
+  // Obliczamy efekty tylko dla aktualnej pozycji myszy
+  const gridPoints = useMemo(() => {
+    if (!isHovered) return [];
+
+    return staticGrid.map(({ x, y }) => {
+      const dx = x - mousePos.x;
+      const dy = y - mousePos.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const maxDistance = 120;
+      const effect = Math.max(0, 1 - distance / maxDistance);
+
+      const pushStrength = effect * 8;
+      const offsetX = distance > 0 ? (dx / distance) * pushStrength : 0;
+      const offsetY = distance > 0 ? (dy / distance) * pushStrength : 0;
+
+      return {
+        x: x + offsetX,
+        y: y + offsetY,
+        scale: 1 + effect * 2.5,
+        color:
+          effect > 0
+            ? `rgba(147, 51, 234, ${effect})`
+            : "rgba(255, 255, 255, 0.15)",
+      };
+    });
+  }, [isHovered, mousePos.x, mousePos.y, staticGrid]);
 
   return (
     <article
@@ -121,7 +134,7 @@ const Audits: FC = () => {
   const [showAll, setShowAll] = useState(false);
   const INITIAL_DISPLAY_COUNT = 6;
   const { ref: sectionRef, isVisible } = useRevealOnIntersect({
-    threshold: 0.1,
+    threshold: 0.08,
     rootMargin: "-5% 0px",
   });
 

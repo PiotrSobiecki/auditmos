@@ -1006,7 +1006,7 @@ button {
   flex-direction: column;
   gap: 0;
   padding-top: 40px;
-  padding-bottom: 200px;
+  padding-bottom: 40px;
 }
 
 .service-card--stack {
