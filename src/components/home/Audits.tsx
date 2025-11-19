@@ -1,8 +1,8 @@
 import { CSSProperties, FC, useMemo, useState } from "react";
 import useRevealOnIntersect from "@/hooks/useRevealOnIntersect";
 import { getRevealStyle } from "@/utils/reveal";
-import auditsVideo from "../../../assets/video/audits.mp4";
-import tileVideo from "../../../assets/video/kafelek.mp4";
+import auditsVideo from "../../../assets/video/kafelek.mp4";
+//import tileVideo from "../../../assets/video/kafelek234.mp4";
 
 interface Audit {
   name: string;
@@ -21,33 +21,101 @@ const AuditCard: FC<AuditCardProps> = ({
   date,
   style,
   className = "",
-}) => (
-  <article className={`audit-card ${className}`.trim()} style={style}>
-    <video
-      className="audit-card__video"
-      autoPlay
-      muted
-      loop
-      playsInline
-      preload="metadata"
+}) => {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMousePos({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+  };
+
+  // Generujemy siatkę punktów
+  const gridSize = 30; // Co ile pikseli punkt
+  const gridPoints = [];
+
+  if (isHovered) {
+    const cardWidth = 400; // Przybliżona szerokość karty
+    const cardHeight = 360; // Przybliżona wysokość karty
+
+    for (let y = 0; y <= cardHeight; y += gridSize) {
+      for (let x = 0; x <= cardWidth; x += gridSize) {
+        const distance = Math.sqrt(
+          Math.pow(x - mousePos.x, 2) + Math.pow(y - mousePos.y, 2)
+        );
+        const maxDistance = 120; // Promień wpływu
+        const effect = Math.max(0, 1 - distance / maxDistance);
+
+        gridPoints.push({
+          x,
+          y,
+          scale: 1 + effect * 2.5, // Powiększenie
+          color:
+            effect > 0
+              ? `rgba(147, 51, 234, ${effect})`
+              : "rgba(255, 255, 255, 0.15)", // Fioletowy gradient
+        });
+      }
+    }
+  }
+
+  return (
+    <article
+      className={`audit-card ${className}`.trim()}
+      style={style}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <source src={tileVideo} type="video/mp4" />
-    </video>
-    <div className="audit-card__content">
-      <p className="audit-card__label">Secured</p>
-      <h3>{name}</h3>
-      <p className="audit-card__date">{date}</p>
-      <a
-        href={reportUrl}
-        target="_blank"
-        rel="noreferrer"
-        className="btn btn_secondary"
+      {/* <video
+        className="audit-card__video"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
       >
-        Read more
-      </a>
-    </div>
-  </article>
-);
+        <source src={tileVideo} type="video/mp4" />
+      </video>*/}
+      {isHovered && (
+        <svg
+          className="audit-card__grid"
+          viewBox="0 0 400 360"
+          preserveAspectRatio="none"
+        >
+          {gridPoints.map((point, i) => (
+            <circle
+              key={i}
+              cx={point.x}
+              cy={point.y}
+              r={2 * point.scale}
+              fill={point.color}
+              style={{
+                transition: "all 0.1s ease-out",
+              }}
+            />
+          ))}
+        </svg>
+      )}
+      <div className="audit-card__content">
+        <p className="audit-card__label">Secured</p>
+        <h3>{name}</h3>
+        <p className="audit-card__date">{date}</p>
+        <a
+          href={reportUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="btn btn_secondary"
+        >
+          Read more
+        </a>
+      </div>
+    </article>
+  );
+};
 
 const Audits: FC = () => {
   const [showAll, setShowAll] = useState(false);
