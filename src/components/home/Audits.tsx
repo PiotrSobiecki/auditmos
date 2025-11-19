@@ -121,7 +121,7 @@ const Audits: FC = () => {
   const [showAll, setShowAll] = useState(false);
   const INITIAL_DISPLAY_COUNT = 6;
   const { ref: sectionRef, isVisible } = useRevealOnIntersect({
-    threshold: 0.2,
+    threshold: 0.1,
     rootMargin: "-5% 0px",
   });
 
