@@ -144,16 +144,18 @@ const Hero: FC = () => {
 
   return (
     <section className="hero" ref={heroRef}>
-      <video
-        ref={videoRef}
-        className="hero__video"
-        autoPlay
-        muted
-        loop
-        playsInline
-      >
-        <source src={backgroundVideo} type="video/mp4" />
-      </video>
+      <div className="hero__video-wrapper">
+        <video
+          ref={videoRef}
+          className="hero__video"
+          autoPlay
+          muted
+          loop
+          playsInline
+        >
+          <source src={backgroundVideo} type="video/mp4" />
+        </video>
+      </div>
       <div className="container hero__grid">
         <div className="hero__content">
           <h1
