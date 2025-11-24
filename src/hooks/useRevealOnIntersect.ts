@@ -14,6 +14,7 @@ const useRevealOnIntersect = ({
 } => {
   const elementRef = useRef<HTMLElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const hasBeenVisibleRef = useRef(false);
 
   useEffect(() => {
     const target = elementRef.current;
@@ -23,7 +24,14 @@ const useRevealOnIntersect = ({
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsVisible(entry.isIntersecting);
+        if (entry.isIntersecting) {
+          hasBeenVisibleRef.current = true;
+          setIsVisible(true);
+        } else if (!hasBeenVisibleRef.current) {
+          // Tylko resetuj jeśli element nigdy nie był widoczny
+          setIsVisible(false);
+        }
+        // Jeśli element był już widoczny, nie resetuj isVisible
       },
       {
         threshold,

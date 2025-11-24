@@ -33,6 +33,7 @@ jobs:
       - name: Build site
         run: yarn build
         env:
+          # Change to '/' if using custom domain, '/auditmos/' for GitHub Pages subdomain
           VITE_PUBLIC_BASE_PATH: /auditmos/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

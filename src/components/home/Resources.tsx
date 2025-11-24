@@ -2,6 +2,7 @@ import { FC, useMemo } from "react";
 import { LINKS } from "@/constants/links";
 import useRevealOnIntersect from "@/hooks/useRevealOnIntersect";
 import { getRevealStyle } from "@/utils/reveal";
+import BinaryBackground from "@/components/shared/BinaryBackground";
 
 const resources = [
   {
@@ -40,6 +41,7 @@ const Resources: FC = () => {
 
   return (
     <section id="resources" className="resources" ref={sectionRef}>
+      <BinaryBackground />
       <div className="container">
         <div
           className="section-header"

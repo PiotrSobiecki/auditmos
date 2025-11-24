@@ -1355,6 +1355,13 @@ button {
   margin-top: 0;
   color: #ffffff;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.resources .container {
+  position: relative;
+  z-index: 1;
 }
 
 .resources__grid {
@@ -1387,6 +1394,9 @@ button {
   background: transparent;
   box-shadow: none;
   transition: all 0.3s ease;
+  will-change: opacity, transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .resource-card:hover {
